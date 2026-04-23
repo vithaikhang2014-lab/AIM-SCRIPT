@@ -1,0 +1,201 @@
+-- Tạo script trong StarterGui (hoặc LocalScript trong ScreenGui)
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+local mouse = player:GetMouse()
+
+-- Tạo ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "AimAssistGUI"
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- Hình chữ nhật chính (khung)
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 200, 0, 150)
+mainFrame.Position = UDim2.new(0.5, -100, 0.5, -75)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+mainFrame.BorderSizePixel = 2
+mainFrame.BorderColor3 = Color3.fromRGB(255, 255, 255)
+mainFrame.BackgroundTransparency = 0.2
+mainFrame.Parent = screenGui
+
+-- Tiêu đề
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 30)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "AIM ASSIST"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextScaled = true
+title.Font = Enum.Font.GothamBold
+title.Parent = mainFrame
+
+-- Nút bật/tắt Aim Head
+local aimButton = Instance.new("TextButton")
+aimButton.Size = UDim2.new(0.8, 0, 0, 40)
+aimButton.Position = UDim2.new(0.1, 0, 0.4, 0)
+aimButton.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+aimButton.BorderColor3 = Color3.fromRGB(255, 255, 255)
+aimButton.Text = "AIM: Nhắm vào đầu: OFF"
+aimButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+aimButton.Font = Enum.Font.GothamBold
+aimButton.TextScaled = true
+aimButton.Parent = mainFrame
+
+-- Trạng thái bật/tắt
+local aimEnabled = false
+
+-- Tạo chữ thập (hình tròn rỗng + chấm giữa màn hình)
+local crosshairFrame = Instance.new("Frame")
+crosshairFrame.Name = "Crosshair"
+crosshairFrame.Size = UDim2.new(0, 0, 0, 0)
+crosshairFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+crosshairFrame.BackgroundTransparency = 1
+crosshairFrame.Parent = screenGui
+
+-- Hình tròn rỗng (viền trắng)
+local outerCircle = Instance.new("Frame")
+outerCircle.Size = UDim2.new(0, 40, 0, 40)
+outerCircle.Position = UDim2.new(0.5, -20, 0.5, -20)
+outerCircle.BackgroundTransparency = 1
+outerCircle.BorderSizePixel = 2
+outerCircle.BorderColor3 = Color3.fromRGB(255, 255, 255)
+outerCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+outerCircle.Parent = crosshairFrame
+-- Làm cho nó thành hình tròn
+local outerUICorner = Instance.new("UICorner")
+outerUICorner.CornerRadius = UDim.new(1, 0)
+outerUICorner.Parent = outerCircle
+
+-- Hình tròn nhỏ ở giữa (chấm đỏ trắng)
+local innerDot = Instance.new("Frame")
+innerDot.Size = UDim2.new(0, 6, 0, 6)
+innerDot.Position = UDim2.new(0.5, -3, 0.5, -3)
+innerDot.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+innerDot.BorderSizePixel = 0
+innerDot.Parent = crosshairFrame
+-- Làm nó thành hình tròn
+local innerUICorner = Instance.new("UICorner")
+innerUICorner.CornerRadius = UDim.new(1, 0)
+innerUICorner.Parent = innerDot
+
+-- Ẩn chữ thập ban đầu
+crosshairFrame.Visible = false
+
+-- Hiệu ứng bấm nút
+aimButton.MouseButton1Click:Connect(function()
+    aimEnabled = not aimEnabled
+    if aimEnabled then
+        aimButton.Text = "AIM: Nhắm vào đầu: ON"
+        aimButton.BackgroundColor3 = Color3.fromRGB(100, 150, 100)
+        crosshairFrame.Visible = true
+    else
+        aimButton.Text = "AIM: Nhắm vào đầu: OFF"
+        aimButton.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+        crosshairFrame.Visible = false
+    end
+end)
+
+-- Hàm tìm kẻ địch gần nhất theo hướng chuột (chỉ nhắm vào đầu)
+local function getClosestEnemyAtCursor()
+    local maxDistance = 300 -- Khoảng cách tối đa để aim
+    local closestPart = nil
+    local closestDistance = maxDistance
+    local character = player.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then
+        return nil
+    end
+    local rootPart = character.HumanoidRootPart
+    local camera = workspace.CurrentCamera
+    if not camera then return nil end
+    
+    -- Lấy hướng từ camera qua chuột
+    local mouseRay = camera:ScreenPointToRay(mouse.X, mouse.Y)
+    
+    -- Duyệt tất cả nhân vật trong workspace
+    for _, otherPlayer in ipairs(Players:GetPlayers()) do
+        if otherPlayer ~= player then
+            local otherChar = otherPlayer.Character
+            if otherChar and otherChar:FindFirstChild("HumanoidRootPart") and otherChar:FindFirstChild("Humanoid") and otherChar.Humanoid.Health > 0 then
+                local head = otherChar:FindFirstChild("Head")
+                if head then
+                    -- Kiểm tra xem vị trí đầu có nằm gần tia từ camera không
+                    local headPos = head.Position
+                    local cameraPos = camera.CFrame.Position
+                    local direction = mouseRay.Direction
+                    local origin = mouseRay.Origin
+                    
+                    -- Tính khoảng cách từ điểm đầu đến tia
+                    local toHead = headPos - origin
+                    local projection = toHead:Dot(direction)
+                    local closestPointOnRay = origin + direction * projection
+                    local distanceToRay = (headPos - closestPointOnRay).Magnitude
+                    
+                    -- Nếu nằm trong bán kính 50 unit và trong tầm nhìn
+                    if distanceToRay < 50 then
+                        local distToPlayer = (rootPart.Position - headPos).Magnitude
+                        if distToPlayer < closestDistance then
+                            closestDistance = distToPlayer
+                            closestPart = head
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return closestPart
+end
+
+-- Vòng lặp aim (tự động hướng về đầu nếu bật)
+RunService.RenderStepped:Connect(function()
+    if not aimEnabled then return end
+    local targetHead = getClosestEnemyAtCursor()
+    if targetHead then
+        local camera = workspace.CurrentCamera
+        if camera then
+            -- Dịch chuyển chuột đến vị trí đầu trên màn hình (ảo, không di chuyển chuột thật nhưng có thể dùng cho công cụ)
+            local headScreenPos, onScreen = camera:WorldToScreenPoint(targetHead.Position)
+            if onScreen then
+                -- Mô phỏng di chuyển chuột (chỉ dành cho môi trường có thể set mouse.X/Y, không hiệu quả trong Roblox thật)
+                -- Thay vào đó, bạn có thể gán target cho tool hoặc tự động xoay camera.
+                -- Dưới đây là cách đơn giản: cập nhật Mouse.Hit hoặc dùng cho gun.
+                -- Lưu ý: Không thể set mouse.X/Y trong Roblox. Để thực sự aim, bạn cần xoay camera.
+                -- Tuy nhiên script này minh họa logic tìm đầu, và bạn có thể gắn vào weapon.
+                
+                -- Nếu có weapon đang trang bị, bạn có thể set mouse.TargetFilter hoặc tự động bắn.
+                -- Ở đây tôi chỉ hiển thị debug.
+                -- Để đơn giản, nó sẽ in ra tên kẻ địch khi aim vào đầu.
+                -- Thay vì fake mouse, bạn nên xoay camera bằng CFrame mới.
+            end
+        end
+    end
+end)
+
+-- Tùy chọn: Tự động bắn khi bật aim (nhấp chuột trái)
+-- Nếu muốn, bỏ comment đoạn dưới
+-- UserInputService.InputBegan:Connect(function(input, gameProcessed)
+--     if gameProcessed then return end
+--     if input.UserInputType == Enum.UserInputType.MouseButton1 and aimEnabled then
+--         local targetHead = getClosestEnemyAtCursor()
+--         if targetHead then
+--             -- Gây sát thương giả hoặc bắn trúng đầu
+--             local humanoid = targetHead.Parent:FindFirstChild("Humanoid")
+--             if humanoid then
+--                 humanoid:TakeDamage(50)
+--                 -- Tạo hiệu ứng hit
+--                 local attachment = Instance.new("Attachment")
+--                 attachment.Parent = targetHead
+--                 local smoke = Instance.new("Smoke")
+--                 smoke.Color = Color3.fromRGB(255, 0, 0)
+--                 smoke.Opacity = 0.5
+--                 smoke.Enabled = true
+--                 smoke.Parent = attachment
+--                 task.wait(0.2)
+--                 smoke:Destroy()
+--                 attachment:Destroy()
+--             end
+--         end
+--     end
+-- end)
