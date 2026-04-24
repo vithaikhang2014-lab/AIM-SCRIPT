@@ -1,8 +1,9 @@
 --[[
-    🌌GLX AIM🌌 - Xeno HEAD-AIM Universal
+    🌌GLX AIM🌌 - Xeno HEAD-AIM Universal (FIX)
+    - AIM chuẩn đầu
+    - ESP Box + tên
+    - Vòng tròn vùng AIM to hơn
     - Góc nhìn thứ nhất mới active
-    - Bấm chuột phải -> aim vào đầu người/model
-    - Kéo thả GUI, thu gọn thành 🌌
 ]]
 
 local Players = game:GetService("Players")
@@ -24,104 +25,96 @@ screenGui.Parent = game:GetService("CoreGui")
 
 -- Nút thu gọn (hình tròn có 🌌)
 local toggleButton = Instance.new("ImageButton")
-toggleButton.Size = UDim2.new(0, 45, 0, 45)
+toggleButton.Size = UDim2.new(0, 50, 0, 50)
 toggleButton.Position = UDim2.new(0.1, 0, 0.6, 0)
 toggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 toggleButton.BackgroundTransparency = 0.2
 toggleButton.BorderSizePixel = 0
 toggleButton.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
-toggleButton.ImageColor3 = Color3.fromRGB(255, 255, 255)
-toggleButton.ImageTransparency = 0
 
--- Thêm chữ 🌌 (do ImageButton không hiện emoji dễ, dùng TextLabel con)
 local emojiLabel = Instance.new("TextLabel")
 emojiLabel.Size = UDim2.new(1, 0, 1, 0)
 emojiLabel.BackgroundTransparency = 1
 emojiLabel.Text = "🌌"
-emojiLabel.TextSize = 28
+emojiLabel.TextSize = 32
 emojiLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 emojiLabel.Font = Enum.Font.SourceSansBold
 emojiLabel.Parent = toggleButton
 
 -- Panel mở rộng
 local mainPanel = Instance.new("Frame")
-mainPanel.Size = UDim2.new(0, 180, 0, 150)
+mainPanel.Size = UDim2.new(0, 200, 0, 180)
 mainPanel.Position = UDim2.new(0.1, 0, 0.6, 0)
-mainPanel.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-mainPanel.BackgroundTransparency = 0.15
+mainPanel.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+mainPanel.BackgroundTransparency = 0.1
 mainPanel.BorderSizePixel = 1
-mainPanel.BorderColor3 = Color3.fromRGB(80, 80, 120)
+mainPanel.BorderColor3 = Color3.fromRGB(100, 100, 150)
 mainPanel.Visible = true
 mainPanel.Active = true
 mainPanel.Draggable = true
 mainPanel.Parent = screenGui
 
--- Tiêu đề
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 25)
+title.Size = UDim2.new(1, 0, 0, 30)
 title.Position = UDim2.new(0, 0, 0, 0)
 title.BackgroundTransparency = 1
-title.Text = "🌌 GLX AIM 🌌"
-title.TextColor3 = Color3.fromRGB(210, 210, 255)
-title.TextSize = 14
+title.Text = "🌌 GLX HEAD-AIM 🌌"
+title.TextColor3 = Color3.fromRGB(180, 180, 255)
+title.TextSize = 15
 title.Font = Enum.Font.GothamBold
 title.Parent = mainPanel
 
--- Nút Bật/Tắt
 local enableToggle = Instance.new("TextButton")
-enableToggle.Size = UDim2.new(0.9, 0, 0, 30)
-enableToggle.Position = UDim2.new(0.05, 0, 0.25, 0)
-enableToggle.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
-enableToggle.Text = "🔥 BẬT AIM (ON)"
-enableToggle.TextColor3 = Color3.fromRGB(150, 255, 150)
-enableToggle.TextSize = 12
+enableToggle.Size = UDim2.new(0.9, 0, 0, 35)
+enableToggle.Position = UDim2.new(0.05, 0, 0.22, 0)
+enableToggle.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+enableToggle.Text = "🔫 BẬT AIM (ON)"
+enableToggle.TextColor3 = Color3.fromRGB(100, 255, 100)
+enableToggle.TextSize = 13
 enableToggle.Parent = mainPanel
 
--- ESP toggle
 local espToggle = Instance.new("TextButton")
-espToggle.Size = UDim2.new(0.9, 0, 0, 30)
-espToggle.Position = UDim2.new(0.05, 0, 0.5, 0)
-espToggle.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+espToggle.Size = UDim2.new(0.9, 0, 0, 35)
+espToggle.Position = UDim2.new(0.05, 0, 0.45, 0)
+espToggle.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
 espToggle.Text = "👁️ ESP BẬT"
-espToggle.TextColor3 = Color3.fromRGB(150, 255, 150)
-espToggle.TextSize = 12
+espToggle.TextColor3 = Color3.fromRGB(100, 255, 100)
+espToggle.TextSize = 13
 espToggle.Parent = mainPanel
 
--- Trạng thái AIM chuột phải
 local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(1, 0, 0, 25)
-statusLabel.Position = UDim2.new(0, 0, 0.75, 0)
+statusLabel.Size = UDim2.new(1, 0, 0, 30)
+statusLabel.Position = UDim2.new(0, 0, 0.7, 0)
 statusLabel.BackgroundTransparency = 1
-statusLabel.Text = "🔴 Chuột phải: CHỜ"
+statusLabel.Text = "⚡ Giữ chuột phải để AIM"
 statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-statusLabel.TextSize = 10
+statusLabel.TextSize = 11
 statusLabel.Parent = mainPanel
 
 -- Crosshair (tâm)
 local crosshair = Instance.new("Frame")
 crosshair.Size = UDim2.new(0, 4, 0, 4)
 crosshair.Position = UDim2.new(0.5, -2, 0.5, -2)
-crosshair.BackgroundColor3 = Color3.fromRGB(255, 80, 120)
+crosshair.BackgroundColor3 = Color3.fromRGB(255, 50, 100)
 crosshair.BorderSizePixel = 0
 crosshair.Parent = screenGui
 
--- Vòng tròn vùng AIM
+-- Vòng tròn vùng AIM (TO HƠN)
 local aimZone = Instance.new("Frame")
-aimZone.Size = UDim2.new(0, 80, 0, 80)
-aimZone.Position = UDim2.new(0.5, -40, 0.5, -40)
-aimZone.BackgroundTransparency = 0.9
-aimZone.BackgroundColor3 = Color3.fromRGB(100, 200, 255)
-aimZone.BorderSizePixel = 1
+aimZone.Size = UDim2.new(0, 180, 0, 180)  -- Tăng từ 80 lên 180
+aimZone.Position = UDim2.new(0.5, -90, 0.5, -90)
+aimZone.BackgroundTransparency = 0.85
+aimZone.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+aimZone.BorderSizePixel = 2
 aimZone.BorderColor3 = Color3.fromRGB(0, 200, 255)
 aimZone.Visible = true
 aimZone.Parent = screenGui
 
--- Làm tròn vòng
 local cornerAim = Instance.new("UICorner")
 cornerAim.CornerRadius = UDim.new(1, 0)
 cornerAim.Parent = aimZone
 
--- Hàm kéo toggleButton
+-- Kéo toggleButton
 local dragging = false
 local dragStart
 local buttonStartPos
@@ -147,27 +140,27 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- Thu gọn/mở rộng
 toggleButton.MouseButton1Click:Connect(function()
     mainPanel.Visible = not mainPanel.Visible
 end)
 
--- Bật/tắt AIM chính
+-- Bật/tắt AIM
 local aimActive = true
 enableToggle.MouseButton1Click:Connect(function()
     aimActive = not aimActive
     if aimActive then
-        enableToggle.Text = "🔥 BẬT AIM (ON)"
-        enableToggle.TextColor3 = Color3.fromRGB(150, 255, 150)
+        enableToggle.Text = "🔫 BẬT AIM (ON)"
+        enableToggle.TextColor3 = Color3.fromRGB(100, 255, 100)
     else
         enableToggle.Text = "💀 TẮT AIM (OFF)"
         enableToggle.TextColor3 = Color3.fromRGB(255, 100, 100)
     end
 end)
 
--- ESP
+-- ESP (Box + Tên)
 local espActive = true
 local espObjects = {}
+
 local function getHeadPart(character)
     if character:FindFirstChild("Head") then return character.Head end
     for _, part in pairs(character:GetDescendants()) do
@@ -179,30 +172,49 @@ local function getHeadPart(character)
 end
 
 local function updateESP()
-    if not espActive then
-        for _, v in pairs(espObjects) do if v then v:Destroy() end end
-        espObjects = {}
-        return
+    for _, v in pairs(espObjects) do 
+        pcall(function() v:Destroy() end)
     end
-    for _, v in pairs(espObjects) do if v then v:Destroy() end end
     espObjects = {}
     
+    if not espActive then return end
+    
     for _, plr in pairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer and plr.Character and plr.Character.PrimaryPart then
-            local head = getHeadPart(plr.Character)
-            if head then
-                local bill = Instance.new("BillboardGui")
-                bill.Size = UDim2.new(0, 4, 0, 4)
-                bill.StudsOffset = Vector3.new(0, 1.5, 0)
-                bill.AlwaysOnTop = true
-                bill.Parent = head
-                local frame = Instance.new("Frame")
-                frame.Size = UDim2.new(0, 4, 0, 4)
-                frame.BackgroundColor3 = Color3.fromRGB(255, 50, 100)
-                frame.BorderSizePixel = 0
-                frame.Parent = bill
-                table.insert(espObjects, bill)
-            end
+        if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
+            local head = plr.Character.Head
+            
+            -- BillboardGui cho Box
+            local billboard = Instance.new("BillboardGui")
+            billboard.Size = UDim2.new(0, 4, 0, 4)
+            billboard.StudsOffset = Vector3.new(0, 1.5, 0)
+            billboard.AlwaysOnTop = true
+            billboard.Parent = head
+            
+            local box = Instance.new("Frame")
+            box.Size = UDim2.new(0, 3, 0, 3)
+            box.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+            box.BorderSizePixel = 0
+            box.Parent = billboard
+            
+            -- NameTag
+            local nameTag = Instance.new("BillboardGui")
+            nameTag.Size = UDim2.new(0, 100, 0, 20)
+            nameTag.StudsOffset = Vector3.new(0, 2.2, 0)
+            nameTag.AlwaysOnTop = true
+            nameTag.Parent = head
+            
+            local nameLabel = Instance.new("TextLabel")
+            nameLabel.Size = UDim2.new(1, 0, 1, 0)
+            nameLabel.BackgroundTransparency = 0.5
+            nameLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            nameLabel.Text = plr.Name
+            nameLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+            nameLabel.TextSize = 12
+            nameLabel.Font = Enum.Font.GothamBold
+            nameLabel.Parent = nameTag
+            
+            table.insert(espObjects, billboard)
+            table.insert(espObjects, nameTag)
         end
     end
 end
@@ -211,7 +223,7 @@ espToggle.MouseButton1Click:Connect(function()
     espActive = not espActive
     if espActive then
         espToggle.Text = "👁️ ESP BẬT"
-        espToggle.TextColor3 = Color3.fromRGB(150, 255, 150)
+        espToggle.TextColor3 = Color3.fromRGB(100, 255, 100)
     else
         espToggle.Text = "🚫 ESP TẮT"
         espToggle.TextColor3 = Color3.fromRGB(255, 100, 100)
@@ -219,92 +231,97 @@ espToggle.MouseButton1Click:Connect(function()
     updateESP()
 end)
 
--- Aim vào đầu gần nhất trong vùng tròn
+-- Lấy phần tử ĐẦU gần nhất trong vùng tròn (to hơn)
 local function getClosestHeadInCircle()
     local mousePos = UserInputService:GetMouseLocation()
     local center = Vector2.new(aimZone.AbsolutePosition.X + aimZone.AbsoluteSize.X/2, aimZone.AbsolutePosition.Y + aimZone.AbsoluteSize.Y/2)
     local radius = aimZone.AbsoluteSize.X/2
     
     local bestDist = radius + 1
-    local bestPart = nil
+    local bestHead = nil
     
     for _, plr in pairs(Players:GetPlayers()) do
         if plr ~= LocalPlayer and plr.Character then
             local head = getHeadPart(plr.Character)
-            if head then
+            if head and head:IsA("BasePart") then
                 local screenPos, onScreen = Camera:WorldToScreenPoint(head.Position)
                 if onScreen then
                     local distToCenter = (Vector2.new(screenPos.X, screenPos.Y) - center).Magnitude
                     if distToCenter < bestDist then
                         bestDist = distToCenter
-                        bestPart = head
+                        bestHead = head
                     end
                 end
             end
         end
     end
-    -- Thêm model có đầu nếu muốn (ví dụ: dummy)
+    
+    -- Thêm model có đầu (dummy, v.v.)
     for _, model in pairs(workspace:GetDescendants()) do
-        if model:IsA("Model") and model ~= LocalPlayer.Character and model:FindFirstChild("Head") and model.Name:lower():find("dummy") then
+        if model:IsA("Model") and model ~= LocalPlayer.Character and model:FindFirstChild("Head") then
             local head = model.Head
-            local screenPos, onScreen = Camera:WorldToScreenPoint(head.Position)
-            if onScreen then
-                local distToCenter = (Vector2.new(screenPos.X, screenPos.Y) - center).Magnitude
-                if distToCenter < bestDist then
-                    bestDist = distToCenter
-                    bestPart = head
+            if head:IsA("BasePart") then
+                local screenPos, onScreen = Camera:WorldToScreenPoint(head.Position)
+                if onScreen then
+                    local distToCenter = (Vector2.new(screenPos.X, screenPos.Y) - center).Magnitude
+                    if distToCenter < bestDist then
+                        bestDist = distToCenter
+                        bestHead = head
+                    end
                 end
             end
         end
     end
     
-    return bestPart, bestDist
+    return bestHead, bestDist
 end
 
--- Aim liên tục không delay
+-- AIM liên tục, KHÔNG DELAY, CHUẨN ĐẦU
 RunService.RenderStepped:Connect(function()
-    -- Cập nhật ESP gần realtime
     updateESP()
     
-    -- Chỉ AIM nếu bật và đang giữ chuột phải + góc nhìn thứ nhất
     if aimActive and rightMousePressed and Camera.CameraType == Enum.CameraType.Custom then
-        local targetHead,dist = getClosestHeadInCircle()
+        local targetHead, dist = getClosestHeadInCircle()
         if targetHead then
             local targetPos = targetHead.Position
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPos)
+            statusLabel.Text = "🎯 ĐANG AIM VÀO ĐẦU!"
+            statusLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+        else
+            statusLabel.Text = "⚠️ Không có đầu trong vùng"
+            statusLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
         end
-    end
-    
-    -- Cập nhật giao diện
-    if rightMousePressed and aiming then
-        statusLabel.Text = "🎯 ĐANG AIM ĐẦU..."
-        statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
-    else
-        statusLabel.Text = "🔴 Chuột phải: CHỜ"
+    elseif aimActive and rightMousePressed and Camera.CameraType ~= Enum.CameraType.Custom then
+        statusLabel.Text = "❌ Chuyển sang góc nhìn thứ nhất!"
+        statusLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
+    elseif not rightMousePressed then
+        statusLabel.Text = "⚡ Giữ chuột phải để AIM đầu"
         statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
     end
 end)
 
--- Bắt chuột phải
+-- Bắt sự kiện chuột phải
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
         rightMousePressed = true
-        aiming = true
-        -- Kiểm tra góc nhìn thứ nhất
-        if Camera.CameraType ~= Enum.CameraType.Custom then
-            aiming = false
-            statusLabel.Text = "⚠️ Chuyển góc nhìn thứ nhất!"
-        end
     end
 end)
 
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
         rightMousePressed = false
-        aiming = false
     end
 end)
 
--- Khởi tạo
+-- Khởi tạo ESP
 updateESP()
+
+-- ESP cập nhật khi có người chơi mới
+Players.PlayerAdded:Connect(function()
+    updateESP()
+end)
+
+Players.PlayerRemoving:Connect(function()
+    updateESP()
+end)
