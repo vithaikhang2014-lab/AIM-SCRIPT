@@ -1,9 +1,9 @@
 --[[
-    🌌GLX AIM🌌 - Xeno HEAD-AIM Universal (FIX)
-    - AIM chuẩn đầu
+    🌌GLX AIM🌌 - Xeno HEAD-AIM (ULTIMATE)
+    - AIM chuẩn đầu khi giữ chuột phải
+    - Crosshair BÁM THEO CHUỘT
+    - Vùng AIM hình tròn 400px
     - ESP Box + tên
-    - Vòng tròn vùng AIM to hơn
-    - Góc nhìn thứ nhất mới active
 ]]
 
 local Players = game:GetService("Players")
@@ -11,26 +11,25 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
 
-local guiEnabled = true
 local aiming = false
 local rightMousePressed = false
 
--- Tạo GUI
+-- GUI
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "GLX_AIM_GUI"
 screenGui.ResetOnSpawn = false
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = game:GetService("CoreGui")
 
--- Nút thu gọn (hình tròn có 🌌)
+-- Nút thu gọn hình tròn 🌌
 local toggleButton = Instance.new("ImageButton")
 toggleButton.Size = UDim2.new(0, 50, 0, 50)
 toggleButton.Position = UDim2.new(0.1, 0, 0.6, 0)
 toggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 toggleButton.BackgroundTransparency = 0.2
 toggleButton.BorderSizePixel = 0
-toggleButton.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
 
 local emojiLabel = Instance.new("TextLabel")
 emojiLabel.Size = UDim2.new(1, 0, 1, 0)
@@ -40,8 +39,9 @@ emojiLabel.TextSize = 32
 emojiLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 emojiLabel.Font = Enum.Font.SourceSansBold
 emojiLabel.Parent = toggleButton
+toggleButton.Parent = screenGui
 
--- Panel mở rộng
+-- Panel chính
 local mainPanel = Instance.new("Frame")
 mainPanel.Size = UDim2.new(0, 200, 0, 180)
 mainPanel.Position = UDim2.new(0.1, 0, 0.6, 0)
@@ -56,11 +56,10 @@ mainPanel.Parent = screenGui
 
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 30)
-title.Position = UDim2.new(0, 0, 0, 0)
 title.BackgroundTransparency = 1
-title.Text = "🌌 GLX HEAD-AIM 🌌"
+title.Text = "🌌 GLX HEAD-AIM 400PX 🌌"
 title.TextColor3 = Color3.fromRGB(180, 180, 255)
-title.TextSize = 15
+title.TextSize = 14
 title.Font = Enum.Font.GothamBold
 title.Parent = mainPanel
 
@@ -91,18 +90,33 @@ statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 statusLabel.TextSize = 11
 statusLabel.Parent = mainPanel
 
--- Crosshair (tâm)
+-- CROSSHAIR BÁM THEO CHUỘT
 local crosshair = Instance.new("Frame")
-crosshair.Size = UDim2.new(0, 4, 0, 4)
-crosshair.Position = UDim2.new(0.5, -2, 0.5, -2)
+crosshair.Size = UDim2.new(0, 6, 0, 6)
 crosshair.BackgroundColor3 = Color3.fromRGB(255, 50, 100)
 crosshair.BorderSizePixel = 0
 crosshair.Parent = screenGui
 
--- Vòng tròn vùng AIM (TO HƠN)
+-- Viền ngoài cho crosshair dễ nhìn
+local crosshairOutline = Instance.new("Frame")
+crosshairOutline.Size = UDim2.new(0, 10, 0, 10)
+crosshairOutline.BackgroundTransparency = 1
+crosshairOutline.BorderSizePixel = 1
+crosshairOutline.BorderColor3 = Color3.fromRGB(255, 255, 255)
+crosshairOutline.Parent = crosshair
+
+local function updateCrosshairPosition()
+    local mousePos = UserInputService:GetMouseLocation()
+    crosshair.Position = UDim2.new(0, mousePos.X - 3, 0, mousePos.Y - 3)
+end
+
+-- Cập nhật vị trí crosshair liên tục
+RunService.RenderStepped:Connect(updateCrosshairPosition)
+
+-- VÙNG AIM 400px
 local aimZone = Instance.new("Frame")
-aimZone.Size = UDim2.new(0, 180, 0, 180)  -- Tăng từ 80 lên 180
-aimZone.Position = UDim2.new(0.5, -90, 0.5, -90)
+aimZone.Size = UDim2.new(0, 400, 0, 400)  -- 400px như yêu cầu
+aimZone.Position = UDim2.new(0.5, -200, 0.5, -200)
 aimZone.BackgroundTransparency = 0.85
 aimZone.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
 aimZone.BorderSizePixel = 2
@@ -116,8 +130,7 @@ cornerAim.Parent = aimZone
 
 -- Kéo toggleButton
 local dragging = false
-local dragStart
-local buttonStartPos
+local dragStart, buttonStartPos
 
 toggleButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -157,7 +170,7 @@ enableToggle.MouseButton1Click:Connect(function()
     end
 end)
 
--- ESP (Box + Tên)
+-- ESP
 local espActive = true
 local espObjects = {}
 
@@ -172,9 +185,7 @@ local function getHeadPart(character)
 end
 
 local function updateESP()
-    for _, v in pairs(espObjects) do 
-        pcall(function() v:Destroy() end)
-    end
+    for _, v in pairs(espObjects) do pcall(function() v:Destroy() end) end
     espObjects = {}
     
     if not espActive then return end
@@ -183,7 +194,6 @@ local function updateESP()
         if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
             local head = plr.Character.Head
             
-            -- BillboardGui cho Box
             local billboard = Instance.new("BillboardGui")
             billboard.Size = UDim2.new(0, 4, 0, 4)
             billboard.StudsOffset = Vector3.new(0, 1.5, 0)
@@ -191,14 +201,13 @@ local function updateESP()
             billboard.Parent = head
             
             local box = Instance.new("Frame")
-            box.Size = UDim2.new(0, 3, 0, 3)
+            box.Size = UDim2.new(0, 4, 0, 4)
             box.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
             box.BorderSizePixel = 0
             box.Parent = billboard
             
-            -- NameTag
             local nameTag = Instance.new("BillboardGui")
-            nameTag.Size = UDim2.new(0, 100, 0, 20)
+            nameTag.Size = UDim2.new(0, 120, 0, 25)
             nameTag.StudsOffset = Vector3.new(0, 2.2, 0)
             nameTag.AlwaysOnTop = true
             nameTag.Parent = head
@@ -231,11 +240,10 @@ espToggle.MouseButton1Click:Connect(function()
     updateESP()
 end)
 
--- Lấy phần tử ĐẦU gần nhất trong vùng tròn (to hơn)
+-- Lấy đầu gần nhất trong vùng 400px
 local function getClosestHeadInCircle()
-    local mousePos = UserInputService:GetMouseLocation()
     local center = Vector2.new(aimZone.AbsolutePosition.X + aimZone.AbsoluteSize.X/2, aimZone.AbsolutePosition.Y + aimZone.AbsoluteSize.Y/2)
-    local radius = aimZone.AbsoluteSize.X/2
+    local radius = aimZone.AbsoluteSize.X/2  -- = 200px
     
     local bestDist = radius + 1
     local bestHead = nil
@@ -256,51 +264,35 @@ local function getClosestHeadInCircle()
         end
     end
     
-    -- Thêm model có đầu (dummy, v.v.)
-    for _, model in pairs(workspace:GetDescendants()) do
-        if model:IsA("Model") and model ~= LocalPlayer.Character and model:FindFirstChild("Head") then
-            local head = model.Head
-            if head:IsA("BasePart") then
-                local screenPos, onScreen = Camera:WorldToScreenPoint(head.Position)
-                if onScreen then
-                    local distToCenter = (Vector2.new(screenPos.X, screenPos.Y) - center).Magnitude
-                    if distToCenter < bestDist then
-                        bestDist = distToCenter
-                        bestHead = head
-                    end
-                end
-            end
-        end
-    end
-    
     return bestHead, bestDist
 end
 
--- AIM liên tục, KHÔNG DELAY, CHUẨN ĐẦU
+-- AIM liên tục, chuẩn đầu
 RunService.RenderStepped:Connect(function()
     updateESP()
+    updateCrosshairPosition()
     
     if aimActive and rightMousePressed and Camera.CameraType == Enum.CameraType.Custom then
-        local targetHead, dist = getClosestHeadInCircle()
+        local targetHead = getClosestHeadInCircle()
         if targetHead then
             local targetPos = targetHead.Position
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPos)
-            statusLabel.Text = "🎯 ĐANG AIM VÀO ĐẦU!"
+            statusLabel.Text = "🎯 ĐANG AIM ĐẦU TRONG VÙNG 400PX!"
             statusLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
         else
-            statusLabel.Text = "⚠️ Không có đầu trong vùng"
+            statusLabel.Text = "⚠️ Không có đầu trong vùng 400px"
             statusLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
         end
     elseif aimActive and rightMousePressed and Camera.CameraType ~= Enum.CameraType.Custom then
         statusLabel.Text = "❌ Chuyển sang góc nhìn thứ nhất!"
         statusLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
     elseif not rightMousePressed then
-        statusLabel.Text = "⚡ Giữ chuột phải để AIM đầu"
+        statusLabel.Text = "⚡ Giữ chuột phải để AIM đầu (vùng 400px)"
         statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
     end
 end)
 
--- Bắt sự kiện chuột phải
+-- Chuột phải
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.UserInputType == Enum.UserInputType.MouseButton2 then
@@ -314,14 +306,7 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- Khởi tạo ESP
+-- Khởi tạo
 updateESP()
-
--- ESP cập nhật khi có người chơi mới
-Players.PlayerAdded:Connect(function()
-    updateESP()
-end)
-
-Players.PlayerRemoving:Connect(function()
-    updateESP()
-end)
+Players.PlayerAdded:Connect(function() updateESP() end)
+Players.PlayerRemoving:Connect(function() updateESP() end)
