@@ -1,7 +1,7 @@
 --[[
     🌌GLX AIM🌌 - Xeno HEAD-AIM (CỐ ĐỊNH GIỮA MÀN HÌNH)
-    - Crosshair + vùng AIM 400px CỐ ĐỊNH tại tâm màn hình
-    - AIM vào đầu khi giữ chuột phải (trong vùng 400px giữa màn hình)
+    - Crosshair + vùng AIM 800px ở GIỮA MÀN HÌNH
+    - Giữ chuột phải -> AIM đầu trong vùng 800px
     - ESP Box + tên
 ]]
 
@@ -11,6 +11,7 @@ local UserInputService = game:GetService("UserInputService")
 local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 
+local aiming = false
 local rightMousePressed = false
 
 -- GUI
@@ -20,7 +21,7 @@ screenGui.ResetOnSpawn = false
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = game:GetService("CoreGui")
 
--- Nút thu gọn 🌌
+-- Nút thu gọn hình tròn 🌌
 local toggleButton = Instance.new("ImageButton")
 toggleButton.Size = UDim2.new(0, 50, 0, 50)
 toggleButton.Position = UDim2.new(0.1, 0, 0.6, 0)
@@ -54,9 +55,9 @@ mainPanel.Parent = screenGui
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 30)
 title.BackgroundTransparency = 1
-title.Text = "🌌 GLX HEAD-AIM (CỐ ĐỊNH) 🌌"
+title.Text = "🌌 GLX HEAD-AIM 800PX 🌌"
 title.TextColor3 = Color3.fromRGB(180, 180, 255)
-title.TextSize = 13
+title.TextSize = 14
 title.Font = Enum.Font.GothamBold
 title.Parent = mainPanel
 
@@ -74,7 +75,7 @@ espToggle.Size = UDim2.new(0.9, 0, 0, 35)
 espToggle.Position = UDim2.new(0.05, 0, 0.45, 0)
 espToggle.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
 espToggle.Text = "👁️ ESP BẬT"
-enableToggle.TextColor3 = Color3.fromRGB(100, 255, 100)
+espToggle.TextColor3 = Color3.fromRGB(100, 255, 100)
 espToggle.TextSize = 13
 espToggle.Parent = mainPanel
 
@@ -87,29 +88,29 @@ statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 statusLabel.TextSize = 11
 statusLabel.Parent = mainPanel
 
--- ========== CROSSHAIR (CỐ ĐỊNH GIỮA MÀN HÌNH) ==========
+-- ========== CROSSHAIR Ở GIỮA MÀN HÌNH ==========
 local crosshair = Instance.new("Frame")
 crosshair.Size = UDim2.new(0, 8, 0, 8)
-crosshair.Position = UDim2.new(0, -4, 0, -4)  -- 0.5 = giữa màn hình
+crosshair.Position = UDim2.new(0.5, -4, 0.5, -4)  -- Giữa màn hình
 crosshair.BackgroundColor3 = Color3.fromRGB(255, 50, 100)
 crosshair.BorderSizePixel = 0
 crosshair.Parent = screenGui
 
 local crosshairOutline = Instance.new("Frame")
 crosshairOutline.Size = UDim2.new(0, 14, 0, 14)
-crosshairOutline.Position = UDim2.new(0, -7, 0, -7)
+crosshairOutline.Position = UDim2.new(0.5, -7, 0.5, -7)
 crosshairOutline.BackgroundTransparency = 1
 crosshairOutline.BorderSizePixel = 1
 crosshairOutline.BorderColor3 = Color3.fromRGB(255, 255, 255)
-crosshairOutline.Parent = crosshair
+crosshairOutline.Parent = screenGui
 
--- ========== VÙNG AIM 400PX (CỐ ĐỊNH GIỮA MÀN HÌNH) ==========
+-- ========== VÙNG AIM 800PX Ở GIỮA MÀN HÌNH ==========
 local aimZone = Instance.new("Frame")
-aimZone.Size = UDim2.new(0, 800, 0, 800)
-aimZone.Position = UDim2.new(0, -200, 0, -200)  -- 0.5 = giữa màn hình
+aimZone.Size = UDim2.new(0, 800, 0, 800)  -- 800px như yêu cầu
+aimZone.Position = UDim2.new(0.5, -400, 0.5, -400)  -- Giữa màn hình
 aimZone.BackgroundTransparency = 0.85
 aimZone.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-aimZone.BorderSizePixel = 5
+aimZone.BorderSizePixel = 2
 aimZone.BorderColor3 = Color3.fromRGB(0, 200, 255)
 aimZone.Visible = true
 aimZone.Parent = screenGui
@@ -230,11 +231,11 @@ espToggle.MouseButton1Click:Connect(function()
     updateESP()
 end)
 
--- ========== LẤY ĐẦU GẦN NHẤT TRONG VÙNG 400PX (TÂM GIỮA MÀN HÌNH) ==========
+-- ========== LẤY ĐẦU GẦN NHẤT TRONG VÙNG 800PX (TÂM LÀ GIỮA MÀN HÌNH) ==========
 local function getClosestHeadInCircle()
     local viewportSize = Camera.ViewportSize
     local center = Vector2.new(viewportSize.X / 2, viewportSize.Y / 2)  -- Tâm màn hình
-    local radius = 200  -- Bán kính 200px
+    local radius = 400  -- Bán kính 400px (vì đường kính 800px)
     
     local bestDist = radius + 1
     local bestHead = nil
@@ -243,6 +244,23 @@ local function getClosestHeadInCircle()
         if plr ~= LocalPlayer and plr.Character then
             local head = getHeadPart(plr.Character)
             if head and head:IsA("BasePart") then
+                local screenPos, onScreen = Camera:WorldToScreenPoint(head.Position)
+                if onScreen then
+                    local distToCenter = (Vector2.new(screenPos.X, screenPos.Y) - center).Magnitude
+                    if distToCenter < bestDist then
+                        bestDist = distToCenter
+                        bestHead = head
+                    end
+                end
+            end
+        end
+    end
+    
+    -- Model có đầu
+    for _, model in pairs(workspace:GetDescendants()) do
+        if model:IsA("Model") and model ~= LocalPlayer.Character and model:FindFirstChild("Head") then
+            local head = model.Head
+            if head:IsA("BasePart") then
                 local screenPos, onScreen = Camera:WorldToScreenPoint(head.Position)
                 if onScreen then
                     local distToCenter = (Vector2.new(screenPos.X, screenPos.Y) - center).Magnitude
@@ -267,17 +285,17 @@ RunService.RenderStepped:Connect(function()
         if targetHead then
             local targetPos = targetHead.Position
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPos)
-            statusLabel.Text = "🎯 ĐANG AIM VÀO ĐẦU!"
+            statusLabel.Text = "🎯 ĐANG AIM ĐẦU! (VÙNG 800PX)"
             statusLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
         else
-            statusLabel.Text = "⚠️ Không có đầu trong vùng 400px"
+            statusLabel.Text = "⚠️ Không có đầu trong vùng 800px"
             statusLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
         end
     elseif aimActive and rightMousePressed and Camera.CameraType ~= Enum.CameraType.Custom then
         statusLabel.Text = "❌ Chuyển sang góc nhìn thứ nhất!"
         statusLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
     elseif not rightMousePressed then
-        statusLabel.Text = "⚡ Giữ chuột phải để AIM (vùng 400px cố định)"
+        statusLabel.Text = "⚡ Giữ chuột phải để AIM (vùng 800px giữa màn hình)"
         statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
     end
 end)
@@ -300,3 +318,10 @@ end)
 updateESP()
 Players.PlayerAdded:Connect(function() updateESP() end)
 Players.PlayerRemoving:Connect(function() updateESP() end)
+
+-- Resize vùng AIM khi màn hình thay đổi (chỉnh lại vị trí giữa)
+Camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+    aimZone.Position = UDim2.new(0.5, -400, 0.5, -400)
+    crosshair.Position = UDim2.new(0.5, -4, 0.5, -4)
+    crosshairOutline.Position = UDim2.new(0.5, -7, 0.5, -7)
+end)
