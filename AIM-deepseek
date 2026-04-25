@@ -90,7 +90,7 @@ statusLabel.Parent = mainPanel
 -- ========== CROSSHAIR (CỐ ĐỊNH GIỮA MÀN HÌNH) ==========
 local crosshair = Instance.new("Frame")
 crosshair.Size = UDim2.new(0, 8, 0, 8)
-crosshair.Position = UDim2.new(0.5, -4, 0.5, -4)  -- 0.5 = giữa màn hình
+crosshair.Position = UDim2.new(0, -4, 0, -4)  -- 0.5 = giữa màn hình
 crosshair.BackgroundColor3 = Color3.fromRGB(255, 50, 100)
 crosshair.BorderSizePixel = 0
 crosshair.Parent = screenGui
@@ -106,7 +106,7 @@ crosshairOutline.Parent = crosshair
 -- ========== VÙNG AIM 400PX (CỐ ĐỊNH GIỮA MÀN HÌNH) ==========
 local aimZone = Instance.new("Frame")
 aimZone.Size = UDim2.new(0, 400, 0, 400)
-aimZone.Position = UDim2.new(0.5, -200, 0.5, -200)  -- 0.5 = giữa màn hình
+aimZone.Position = UDim2.new(0, -200, 0, -200)  -- 0.5 = giữa màn hình
 aimZone.BackgroundTransparency = 0.85
 aimZone.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
 aimZone.BorderSizePixel = 2
