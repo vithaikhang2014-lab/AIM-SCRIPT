@@ -97,7 +97,7 @@ crosshair.Parent = screenGui
 
 local crosshairOutline = Instance.new("Frame")
 crosshairOutline.Size = UDim2.new(0, 14, 0, 14)
-crosshairOutline.Position = UDim2.new(0.5, -7, 0.5, -7)
+crosshairOutline.Position = UDim2.new(0, -7, 0, -7)
 crosshairOutline.BackgroundTransparency = 1
 crosshairOutline.BorderSizePixel = 1
 crosshairOutline.BorderColor3 = Color3.fromRGB(255, 255, 255)
@@ -105,11 +105,11 @@ crosshairOutline.Parent = crosshair
 
 -- ========== VÙNG AIM 400PX (CỐ ĐỊNH GIỮA MÀN HÌNH) ==========
 local aimZone = Instance.new("Frame")
-aimZone.Size = UDim2.new(0, 400, 0, 400)
+aimZone.Size = UDim2.new(0, 800, 0, 800)
 aimZone.Position = UDim2.new(0, -200, 0, -200)  -- 0.5 = giữa màn hình
 aimZone.BackgroundTransparency = 0.85
 aimZone.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-aimZone.BorderSizePixel = 2
+aimZone.BorderSizePixel = 5
 aimZone.BorderColor3 = Color3.fromRGB(0, 200, 255)
 aimZone.Visible = true
 aimZone.Parent = screenGui
